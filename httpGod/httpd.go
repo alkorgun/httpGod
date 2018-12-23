@@ -85,7 +85,6 @@ func MakeResponseWHeaders(code int, data []byte, headers []Header) []byte {
 		response = append(response,
 			[]byte(fmt.Sprintf("%s: %s\r\n", h.Key, h.Value))...)
 	}
-
 	response = append(response, '\r', '\n')
 
 	if len(data) > 0 {
@@ -109,7 +108,6 @@ const indexTail = `</ul>
 
 func handleFolder(conn net.Conn, folder string, url string) {
 	info, err := ioutil.ReadDir(folder)
-
 	if err != nil {
 		conn.Write(MakeResponse(500, []byte("Okay not\n")))
 		return
@@ -170,7 +168,6 @@ func isTextFile(name string) bool {
 
 func handleFile(conn net.Conn, filename string, size int64) {
 	file, err := os.Open(filename)
-
 	if err != nil {
 		conn.Write(MakeResponse(500, []byte("Okay not\n")))
 		return
@@ -182,7 +179,6 @@ func handleFile(conn net.Conn, filename string, size int64) {
 	// just for fun (could be done with io.Copy)
 	for buffer := make([]byte, 8192); ; {
 		length, err := file.Read(buffer)
-
 		if err != nil {
 			if err != io.EOF {
 				log.Printf("can't read: %s\n", filename)
@@ -257,17 +253,16 @@ func handleRequest(conn net.Conn, req *Request) {
 	}
 	filename := path.Join(ServerRoot, url)
 
-	fstat, err := os.Stat(filename)
-
+	stat, err := os.Stat(filename)
 	if err != nil {
 		conn.Write(MakeResponse(404, []byte("Okay not\n")))
 		return
 	}
 
-	if fstat.Mode().IsDir() {
+	if stat.Mode().IsDir() {
 		handleFolder(conn, filename, url)
 	} else {
-		handleFile(conn, filename, fstat.Size())
+		handleFile(conn, filename, stat.Size())
 	}
 }
 
@@ -362,7 +357,6 @@ func handleConn(conn net.Conn) {
 	// just for fun  (could be done with bufio.NewReader)
 	for buff := MakeLineBuffer(conn); ; {
 		line, err := buff.ReadLine()
-
 		if err != nil {
 			log.Printf("can't read: %v\n", conn.RemoteAddr())
 			break
